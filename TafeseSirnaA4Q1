@@ -1,0 +1,113 @@
+"""TafeseSirnaA4Q1
+COMP 1012 SECTION AO2
+INSTRUCTOR: Dr.Chowdhury
+ASSIGNMENT: A4 Question 1
+AUTHOR Sirna Tafese
+VERSION [2024/12/11
+PURPOSE: Create a program that can take in information from data files and plot it on
+a graph.
+"""
+
+import matplotlib.pyplot as plt
+
+gduplooy@gmail.com
+
+# Load star data from a file and return as a dictionary
+def loadStars(filename):
+    """
+    return: dictionary where keys are HD numbers and values are tuples containing 
+            the star's X coordinate, Y coordinate, magnitude, and a list of star names
+    parameter: filename - the name of the file containing star data
+    """
+    stars = {}
+    with open(filename, 'r') as f:
+        for line in f:
+            line = line.strip().split(',')
+            hdNumber = int(line[3])  # HD number as key
+            x = float(line[0])  # X coordinate
+            y = float(line[1])  # Y coordinate
+            magnitude = float(line[4])  # Star magnitude
+            names = []
+            if len(line) == 7:  # If names exist
+                names = line[6].split(';')
+            else:
+                names.append('')
+
+            stars[hdNumber] = (x, y, magnitude, names)  # Store star data in dictionary
+    return stars
+
+# Filter stars by a magnitude limit
+def filterByMagnitude(starDict, limitMag):
+    """
+    return: list of tuples containing the X, Y coordinates and magnitude of stars 
+            with a magnitude less than or equal to the specified limit
+    parameter: starDict - dictionary of star data
+    parameter: limitMag - the magnitude limit for filtering stars
+    """
+
+    starsToPlot = []
+    for key, value in starDict.items():
+        if value[2] <= limitMag:  # Check if magnitude is below the limit
+            starsToPlot.append((value[0], value[1], value[2]))  # Add star to list
+    return starsToPlot
+
+# Plot the stars using scatter plot
+def plotStars(starsToPlot):
+    """
+    return: None
+    parameter: starsToPlot - list of tuples containing X, Y coordinates and magnitude of stars to plot
+    """
+    x = []
+    y = []
+    size = []
+
+    for star in starsToPlot:
+        x.append(star[0])  # X position
+        y.append(star[1])  # Y position
+        size.append(5 - star[2])  # Size inversely proportional to magnitude
+    
+    plt.scatter(x, y, s = size, c='k')  # Plot stars as black dots
+    plt.show()
+
+# Plot constellation lines based on star data and a constellation file
+def plotConstellation(starDict, constellationFile):
+    """
+    return: None
+    parameter: starDict - dictionary of star data
+    parameter: constellationFile - the name of the file containing constellation data
+    """
+    with open(constellationFile, 'r') as file:
+        for line in file:
+            data = line.strip().split(',')
+            name1 = data[0].strip()
+            name2 = data[1].strip()
+            for key, value in starDict.items():
+                if name1 in value[3]:  # Find coordinates of first star
+                    x1, y1 = value[0], value[1]
+                if name2 in value[3]:  # Find coordinates of second star
+                    x2, y2 = value[0], value[1]
+            plt.plot([x1, x2], [y1, y2], lw=1, c='b')  # Plot line between stars
+
+# Main function to run the program
+def main():
+    """
+    return: None
+    parameter: None
+    """
+    filename = input("Please enter the name of the file containing the stars ")
+
+    limitMag = float(input("Please enter the limiting magnitude "))
+
+    starDict = loadStars(filename)  # Load star data
+
+    starsToPlot = filterByMagnitude(starDict, limitMag)  # Filter stars by magnitude
+
+    plotStars(starsToPlot)  # Plot filtered stars
+
+    constellationFile = input("Please enter the name of a constellation file ")
+    
+    plotConstellation(starDict, constellationFile)  # Plot constellation lines
+
+if __name__ == "__main__":
+    main()  # Run the main function
+    print("End of processing") 
